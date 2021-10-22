@@ -1,0 +1,23 @@
+inherit_from:
+  - .rubocop_airbnb.yml
+
+Rails:
+  Enabled: true
+AllCops:
+  TargetRubyVersion: 2.7.2
+  DisplayStyleGuide: true
+  Exclude:
+    - 'db/**/*'
+    - 'config/**/*'
+    - 'public/**/*'
+    - 'tmp/**/*'
+    - 'log/**/*'
+    - 'vendor/**/*'
+    - 'lib/tasks/_force_reload.rake'
+    - 'bin/**/*'
+    - 'spec/controllers/*'
+
+# ブロック内の行数
+Metrics/BlockLength:
+  Exclude:
+    - 'spec/**/*'
