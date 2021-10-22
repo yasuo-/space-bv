@@ -1,0 +1,73 @@
+version: "3.9"
+services:
+  db:
+    image: postgres
+    volumes:
+      - ./tmp/db:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    environment:
+      PGDATA: /var/lib/postgresql/data/pgdata
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+      POSTGRES_HOST_AUTH_METHOD: trust
+      POSTGRES_INITDB_ARGS: "--encoding=UTF-8"
+      TZ: Asia/Tokyo
+
+  nginx:
+    build:
+      context: ./nginx
+      dockerfile: Dockerfile
+    ports:
+      - 80:80
+    restart: always
+    depends_on:
+      - app
+
+  app:
+    build: .
+    command: bash -c "rm -f tmp/pids/server.pid && bundle exec rails s -p 3000 -b '0.0.0.0'"
+    volumes:
+      - .:/myapp:cached
+      - rails_cache:/myapp/tmp/cache
+      - node_modules:/myapp/node_modules:cached
+      - bundle:/bundle:cached
+    tmpfs:
+      - /tmp
+    tty: true
+    stdin_open: true
+    ports:
+      - "3000:3000"
+    environment:
+      RAILS_ENV: development
+      NODE_ENV: development
+      DATABASE_HOST: db
+      DATABASE_NAME: "app_development"
+      DATABASE_PORT: 5432
+      DATABASE_USER: postgres
+      DATABASE_PASSWORD: password
+      WEBPACKER_DEV_SERVER_HOST: webpacker
+    depends_on:
+      - db
+      - webpacker
+
+  webpacker:
+    build: .
+    command: ./bin/webpack-dev-server
+    volumes:
+      - .:/myapp:cached
+      - node_modules:/myapp/node_modules:cached
+    environment:
+      RAILS_ENV: development
+      NODE_ENV: development
+      WEBPACKER_DEV_SERVER_HOST: 0.0.0.0
+    tty: false
+    stdin_open: false
+    ports:
+      - "3035:3035"
+
+volumes:
+  rails_cache:
+  node_modules:
+  postgres:
+  bundle:
