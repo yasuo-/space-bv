@@ -47,6 +47,8 @@ services:
       DATABASE_USER: postgres
       DATABASE_PASSWORD: password
       WEBPACKER_DEV_SERVER_HOST: webpacker
+      SELENIUM_REMOTE_URL: http://webdriver_chrome:4444/wd/hub
+      TZ: "Asia/Tokyo"
     depends_on:
       - db
       - webpacker
@@ -66,8 +68,24 @@ services:
     ports:
       - "3035:3035"
 
+  redis:
+    image: redis:6
+
+  mailhog:
+    container_name: myapp_mailhog
+    environment:
+      MH_STORAGE: maildir
+      MH_MAILDIR_PATH: /tmp
+    image: mailhog/mailhog:v1.0.0
+    ports:
+      - "8025:8025"
+    volumes:
+      - maildir:/tmp
+
 volumes:
   rails_cache:
   node_modules:
   postgres:
   bundle:
+  maildir:
+    name: myapp_maildir
